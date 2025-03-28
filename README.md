@@ -1,24 +1,28 @@
-<form id="login-form">
-    <input type="text" id="username" name="username" placeholder="Username" required>
-    <input type="password" id="password" name="password" placeholder="Password" required>
-    <button type="submit">Login</button>
-</form>
+<?php
+require_once '../db/config.php';
+header('Content-Type: application/json');
 
-<script>
-    document.getElementById('login-form').addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $data = json_decode(file_get_contents("php://input"));
+    
+    $username = $data->username;
+    $password = $data->password;
 
-        const response = await fetch('api/authenticate.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username, password }),
-        });
+    $stmt = $connection->prepare("SELECT password, role FROM users WHERE username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $stmt->store_result();
 
-        const result = await response.json();
-        console.log(result);
-    });
-</script>
+    if ($stmt->num_rows > 0) {
+        $stmt->bind_result($stored_password, $role);
+        $stmt->fetch();
+        if ($stored_password === $password) {
+            echo json_encode(["success" => true, "role" => $role]);
+        } else {
+            echo json_encode(["success" => false, "message" => "Invalid credentials"]);
+        }
+    } else {
+        echo json_encode(["success" => false, "message" => "No user found"]);
+    }
+}
+?>
