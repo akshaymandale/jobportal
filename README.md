@@ -1,11 +1,11 @@
 <?php
-require_once '../db/config.php';
-header('Content-Type: application/json');
+$host = 'localhost';
+$user = 'root'; // Default for XAMPP
+$password = ''; // Default (should be empty for XAMPP)
+$dbname = 'job_portal';
 
-if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    $query = "SELECT job_posts.*, categories.name AS category_name FROM job_posts 
-              JOIN categories ON job_posts.category_id = categories.id";
-    $result = $connection->query($query);
-    echo json_encode($result->fetch_all(MYSQLI_ASSOC));
+$connection = new mysqli($host, $user, $password, $dbname);
+if ($connection->connect_error) {
+    die("Connection failed: " . $connection->connect_error);
 }
 ?>
