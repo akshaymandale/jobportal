@@ -140,3 +140,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 ?>
+
+----------------------------xxx--------------
+
+
+Insert Categories:
+First, ensure the categories table has the appropriate categories before you insert jobs.
+
+CopyReplit
+DELETE FROM categories; -- Clear existing data (optional)
+
+INSERT INTO categories (name) VALUES
+('Software Development'), -- ID 1
+('Marketing'),            -- ID 2
+('Data Science'),         -- ID 3
+('Design'),               -- ID 4
+('Customer Support');     -- ID 5
+Insert Companies:
+Then, verify that the companies table contains a valid company record that will be referenced by company_id in job_posts.
+
+CopyReplit
+DELETE FROM companies; -- Clear existing data (optional)
+
+INSERT INTO companies (user_id, name) VALUES
+(2, 'Tech Solutions Ltd'); -- Make sure user_id 2 exists in users table
+Finally, Insert Job Posts
+Once the categories and companies entries are in place, you should be able to insert job posts without issues:
+
+CopyReplit
+DELETE FROM job_posts; -- Clear existing data (optional)
+
+INSERT INTO job_posts (title, company_id, salary, location, category_id, description) VALUES
+('Senior PHP Developer', 1, 80000, 'Remote', 1, 'We are looking for a Senior PHP Developer to join our team.'),
+('Marketing Specialist', 1, 60000, 'New York', 2, 'Join our marketing team to promote our services.'),
+('Data Analyst', 1, 70000, 'San Francisco', 3, 'Analyze data to inform business decisions.'),
+('UI/UX Designer', 1, 65000, 'Chicago', 4, 'Design user-friendly interfaces for our applications.'),
+('Customer Support Representative', 1, 45000, 'Remote', 5, 'Help customers with their inquiries and issues.');
