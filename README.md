@@ -1,28 +1,64 @@
-<?php
-require_once '../db/config.php';
-header('Content-Type: application/json');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Portal</title>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadJobListings();
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $data = json_decode(file_get_contents("php://input"));
-    
-    $username = $data->username;
-    $password = $data->password;
+            document.getElementById('login-form').addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
 
-    $stmt = $connection->prepare("SELECT password, role FROM users WHERE username = ?");
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $stmt->store_result();
+                const response = await fetch('api/authenticate.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
+                });
 
-    if ($stmt->num_rows > 0) {
-        $stmt->bind_result($stored_password, $role);
-        $stmt->fetch();
-        if ($stored_password === $password) {
-            echo json_encode(["success" => true, "role" => $role]);
-        } else {
-            echo json_encode(["success" => false, "message" => "Invalid credentials"]);
+                const result = await response.json();
+                console.log(result);
+                if (result.success) {
+                    alert(`Logged in as ${result.role}`);
+                } else {
+                    alert(result.message);
+                }
+            });
+        });
+
+        async function loadJobListings() {
+            const response = await fetch('api/job_posts.php');
+            const jobs = await response.json();
+            const jobList = document.getElementById('job-list');
+
+            jobs.forEach(job => {
+                const li = document.createElement('li');
+                li.innerText = `${job.title} - ${job.location} - $${job.salary}`;
+                jobList.appendChild(li);
+            });
         }
-    } else {
-        echo json_encode(["success" => false, "message" => "No user found"]);
-    }
-}
-?>
+    </script>
+</head>
+<body>
+    <h1>Job Portal</h1>
+    
+    <div id="login">
+        <h2>Login</h2>
+        <form id="login-form">
+            <input type="text" id="username" name="username" placeholder="Username" required>
+            <input type="password" id="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <div id="job-posts">
+        <h2>Job Listings</h2>
+        <ul id="job-list"></ul>
+    </div>
+</body>
+</html>
